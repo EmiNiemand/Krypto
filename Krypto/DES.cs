@@ -182,7 +182,7 @@ namespace Krypto
         //Functions
         BitArray Permutation(BitArray bits, byte[] permut)
         {
-            byte[] toPermut = new byte[permut.Length];
+            bool[] toPermut = new bool[permut.Length];
 
             for (int i = 0; i < permut.Length; i++)
             {
@@ -208,12 +208,12 @@ namespace Krypto
                 }
             }
 
-            return xor;
+            return new BitArray(xor);
         }
 
         BitArray Concat(BitArray one, BitArray two)
         {
-            byte[] concat = byte[one.Length + two.Length];
+            bool[] concat = new bool[one.Length + two.Length];
             for (int i = 0; i < one.Length; i++)
             {
                 concat[i] = one[i];
@@ -227,7 +227,7 @@ namespace Krypto
 
         BitArray ShiftLeft(BitArray bits, byte number)
         {
-            List<byte> shift = new List<byte>();
+            List<bool> shift = new List<bool>();
             for (int i = 0; i < number; i++)
             {
                 shift.Add(bits[i]);
@@ -236,18 +236,18 @@ namespace Krypto
                     bits[i] = bits[i+1];
                 }
             }
-            int j = 0;
+            int k = 0;
             for(int i = bits.Length-number; i < bits.Length; i++)
             {
-                bits[i] = shift[j];
-                j++;
+                bits[i] = shift[k];
+                k++;
             }
             return bits;
         }
 
         BitArray LeftHalf(BitArray bits)
         {
-            byte[] leftSide = new byte[bits.Length/2];
+            bool[] leftSide = new bool[bits.Length/2];
             for(int i = 0; i < leftSide.Length; i++)
             {
                 leftSide[i] = bits[i];
@@ -257,7 +257,7 @@ namespace Krypto
 
         BitArray RightHalf(BitArray bits)
         {
-            byte[] rightSide = new byte[bits.Length/2];
+            bool[] rightSide = new bool[bits.Length/2];
             for(int i = 0; i < rightSide.Length; i++)
             {
                 rightSide[i + bits.Length] = bits[i + bits.Length];
@@ -271,10 +271,10 @@ namespace Krypto
             BitArray[] subkeys = new BitArray[16];
             BitArray keyBits = BytesToBits(key);
 
-            byte[] permutKey = Permutation(key, permutKeyPC1);
-            byte[] temp = new byte[permutKey.Length];
-            byte[] rightHalf = RightHalf(permutKey);
-            byte[] leftHalf = LeftHalf(permutKey);
+            BitArray permutKey = Permutation(new BitArray(key), permutKeyPC1);
+            BitArray temp;
+            BitArray rightHalf = RightHalf(permutKey);
+            BitArray leftHalf = LeftHalf(permutKey);
 
             for (int i = 0; i < 16; i++)
             {
