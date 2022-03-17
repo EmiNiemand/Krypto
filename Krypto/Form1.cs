@@ -13,6 +13,8 @@ namespace Krypto
 {
     public partial class Form1 : Form
     {
+        DES des = new DES();
+
         public Form1()
         {
             InitializeComponent();
@@ -35,7 +37,7 @@ namespace Krypto
 
         private void loadButton_Click(object sender, EventArgs e)
         {
-            String filePath = String.Empty, fileContent = String.Empty;
+            String fileContent = String.Empty;
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
@@ -46,8 +48,6 @@ namespace Krypto
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                filePath = openFileDialog.FileName;
-
                 var fileStream = openFileDialog.OpenFile();
 
                 using (StreamReader reader = new StreamReader(fileStream))
@@ -57,20 +57,18 @@ namespace Krypto
             }
 
             messageTextBox.Text = fileContent;
-
-            // Wywołanie Szymonowej funkcji z przekazaniem fileContent lub filePath
         }
 
         private void encryptButton_Click(object sender, EventArgs e)
         {
             resoultGroupBox.Enabled = true;
-            // outputTextBox.Text = Szymonowafunkcja();
+            outputTextBox.Text = des.Cipher(messageTextBox.Text, currentKeyLabel.Text);
         }
 
         private void decryptButton_Click(object sender, EventArgs e)
         {
             resoultGroupBox.Enabled = true;
-            // outputTextBox.Text = Szymonowafunkcja();
+            outputTextBox.Text = des.Decipher(messageTextBox.Text, currentKeyLabel.Text);
         }
 
         private void saveButton_Click(object sender, EventArgs e)
@@ -97,6 +95,7 @@ namespace Krypto
         private void newKeyButton_Click(object sender, EventArgs e)
         {
             currentKeyLabel.Text = newKeyTextBox.Text;
+            newKeyTextBox.Text = "";
         }
 
         private void newKeyTextBox_TextChanged(object sender, EventArgs e)
@@ -113,8 +112,7 @@ namespace Krypto
 
         private void generateRandomKeyButton_Click(object sender, EventArgs e)
         {
-            // currentKeyLabel.Text = SzymonowaFunkcja();
-            currentKeyLabel.Text = "randokey";
+            currentKeyLabel.Text = des.GenerateKey();
         }
     }
 }
