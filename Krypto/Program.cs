@@ -19,6 +19,14 @@ namespace Krypto
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
 
+            DES des = new DES();
+
+            string key = des.GenerateKey();
+
+            string cyph = des.Cipher("dupaUpa", key);
+
+            string decyph = des.Decipher(des.Cipher("dupaUpa", "adfgefcs"), key);
+
             
         }
     }

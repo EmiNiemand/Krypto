@@ -116,18 +116,15 @@ namespace Krypto
                     7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8,
                     2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11}};
 
+        int numberOfBitsAdded;
+
+
         public string GenerateKey()
         {
             Random random = new Random();
             byte[] keyBytes = new byte[8];
             random.NextBytes(keyBytes);
             return BytesToString(keyBytes);
-        }
-        
-        public byte[] ReadFile(string path)
-        {
-            byte[] bytes = File.ReadAllBytes(path);
-            return bytes;
         }
 
         //Type Converters
@@ -164,7 +161,7 @@ namespace Krypto
             return bytes;
         }
 
-        private static byte BoolArrayToByte(bool[] source)
+        static byte BoolArrayToByte(bool[] source)
         {
             byte result = 0;
             int index = 8 - source.Length;
@@ -194,21 +191,7 @@ namespace Krypto
 
         BitArray XOR(BitArray one, BitArray two)
         {
-            byte[] xor = new byte[one.Length];
-
-            for (int i = 0; i < xor.Length; i++)
-            {
-                if (one[i] == two[i])
-                {
-                    xor[i] = 0;
-                }
-                else
-                {
-                    xor[i] = 1;
-                }
-            }
-
-            return new BitArray(xor);
+            return one.Xor(two);
         }
 
         BitArray Concat(BitArray one, BitArray two)
@@ -260,12 +243,11 @@ namespace Krypto
             bool[] rightSide = new bool[bits.Length/2];
             for(int i = 0; i < rightSide.Length; i++)
             {
-                rightSide[i + bits.Length] = bits[i + bits.Length];
+                rightSide[i] = bits[i + rightSide.Length];
             }
             return new BitArray(rightSide);
         }
 
-        //
         BitArray[] GenerateSubKeys(byte[] key)
         {
             BitArray[] subkeys = new BitArray[16];
@@ -286,6 +268,165 @@ namespace Krypto
 
             return subkeys;
         }
-    }
 
+        static byte BoolATB(bool[] source)
+        {
+            byte result = 0;
+            int index = 8 - source.Length;
+            foreach (bool b in source)
+            {
+                if (b) 
+                {
+                    result |= (byte)(1 << (7 - index));
+                }
+                index++;
+            }
+            return result;
+        }
+
+        int getNumber(BitArray bits)
+        {
+            bool[] column = {bits[1], bits[2], bits[3], bits[4]};
+            bool[] row = {bits[0], bits[5]};
+            int a = DES.BoolATB(row) * 16;
+            int b = DES.BoolATB(column);
+            int i = Convert.ToInt32(DES.BoolATB(row) * 16 + DES.BoolATB(column));
+            return i;
+        }
+
+        BitArray FeistelFunction(BitArray rightHalf, BitArray key)
+        {
+            BitArray result = new BitArray(1);
+            BitArray permutRight = Permutation(rightHalf, permutExt);
+            BitArray xor = XOR(permutRight, key);
+            BitArray[] groups = new BitArray[xor.Length/6];
+
+            for (int i = 0; i < xor.Length/6; i++)
+            {
+                bool[] bitArray = new bool[6];
+                for (int j = i * 6; j < i * 6 + 6; j++)
+                {
+                    bitArray[j%6] = xor[j];
+                }
+                groups[i] = new BitArray(bitArray);
+            }
+
+            byte[] temp = new byte[1];
+
+            for (int i = 0; i < groups.Length; i++)
+            {
+                temp[0] = SBox[i][getNumber(groups[i])];
+                BitArray helper = new BitArray(temp);
+                bool[] tempResult = new bool[4];
+                for (int j = 4; j < 8; j++)
+                {
+                    tempResult[j-4] = helper[j];
+                }
+                if(i == 0)
+                {
+                    result = new BitArray(tempResult);
+                } 
+                else
+                {
+                    result = Concat(result, new BitArray(tempResult));
+                }
+            }
+            result = Permutation(result, permutPBlock);
+            return result;
+        }
+
+        BitArray BlockIterations(BitArray rightHalf, BitArray leftHalf, BitArray[] subKeys)
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                BitArray previousLeft = (BitArray)leftHalf.Clone();
+                leftHalf = (BitArray)rightHalf.Clone();
+                rightHalf = XOR(previousLeft, FeistelFunction(rightHalf, subKeys[i]));
+            }
+            BitArray result = Concat(leftHalf, rightHalf);
+            result = Permutation(result, permutEnd);
+            return result;
+        }
+
+        //Ciphering and deciphering
+        public string Cipher(string message, string key)
+        {
+            BitArray[] subKeys = GenerateSubKeys(StringToBytes(key));
+
+            BitArray bitMessage = BytesToBits(StringToBytes(message));
+            if(bitMessage.Length % 64 != 0)
+            {
+                BitArray newBitMessage = new BitArray(bitMessage.Length + (64 - bitMessage.Length % 64));
+                this.numberOfBitsAdded = 64 - bitMessage.Length % 64;
+                for(int i = 0; i < bitMessage.Length; i++)
+                {
+                    newBitMessage[i] = bitMessage[i];
+                }
+                bitMessage = newBitMessage;
+            }
+
+            BitArray[] blocks = new BitArray[bitMessage.Length / 64];
+            for(int i = 0; i < bitMessage.Length; i = i + 64)
+            {
+                BitArray temp = new BitArray(64);
+                for(int j = i; j < i + 64; j++)
+                {
+                    temp[j % 64] = bitMessage[j];
+                }
+                blocks[i / 64] = temp;
+            }
+
+            foreach(BitArray block in blocks)
+            {
+                BitArray permutBeg = Permutation(block, permutBeginning);
+                BitArray leftHalf = LeftHalf(permutBeg);
+                BitArray rightHalf = RightHalf(permutBeg);
+                
+                bitMessage = BlockIterations(rightHalf, leftHalf, subKeys);
+            }
+
+            string CypheredMessage = BytesToString(BitsToBytes(bitMessage));
+            return CypheredMessage;
+        }
+
+
+        public string Decipher(string message, string key)
+        {
+            BitArray[] subKeys = GenerateSubKeys(StringToBytes(key));
+
+            Array.Reverse(subKeys);
+
+            BitArray bitMessage = BytesToBits(StringToBytes(message));
+
+            BitArray[] blocks = new BitArray[bitMessage.Length / 64];
+            for(int i = 0; i < bitMessage.Length; i = i + 64)
+            {
+                BitArray temp = new BitArray(64);
+                for(int j = i; j < i + 64; j++)
+                {
+                    temp[j % 64] = bitMessage[j];
+                }
+                blocks[i / 64] = temp;
+            }
+
+            foreach(BitArray block in blocks)
+            {
+                BitArray permutBeg = Permutation(block, permutBeginning);
+                BitArray leftHalf = LeftHalf(permutBeg);
+                BitArray rightHalf = RightHalf(permutBeg);
+                
+                bitMessage = BlockIterations(rightHalf, leftHalf, subKeys);
+            }
+
+            BitArray orginalBitMessage = new BitArray(bitMessage.Length - numberOfBitsAdded);
+
+            for(int i = 0; i < bitMessage.Length - numberOfBitsAdded; i++)
+            {
+                orginalBitMessage[i] = bitMessage[i];
+            }
+
+            string orginalMessage = BytesToString(BitsToBytes(orginalBitMessage));
+            return orginalMessage;
+        }        
+    }
 }
