@@ -18,6 +18,9 @@ namespace Krypto
         byte[] fileContent;
         byte[] text;
 
+        string key;
+
+
         public Form1()
         {
             InitializeComponent();
@@ -44,19 +47,20 @@ namespace Krypto
         private void encryptButton_Click(object sender, EventArgs e)
         {
             resoultGroupBox.Enabled = true;
-            text = des.Cipher(des.StringToBytes(messageTextBox.Text), currentKeyLabel.Text);
+            text = des.Cipher(des.StringToBytes(messageTextBox.Text), key);
             outputTextBox.Text = des.BytesToString(text);
         }
 
         private void decryptButton_Click(object sender, EventArgs e)
         {
             resoultGroupBox.Enabled = true;
-            messageTextBox.Text = des.BytesToString(des.Decipher(text, currentKeyLabel.Text));
+            messageTextBox.Text = des.BytesToString(des.Decipher(text, key));
         }
 
         private void newKeyButton_Click(object sender, EventArgs e)
         {
-            currentKeyLabel.Text = newKeyTextBox.Text;
+            key = newKeyTextBox.Text;
+            currentKeyLabel.Text = key;
             newKeyTextBox.Text = "";
         }
 
@@ -74,12 +78,13 @@ namespace Krypto
 
         private void generateRandomKeyButton_Click(object sender, EventArgs e)
         {
-            currentKeyLabel.Text = des.GenerateKey();
+            key = des.GenerateKey();
+            currentKeyLabel.Text = key;
         }
 
         private void saveButtonCipher_Click(object sender, EventArgs e)
         {
-            byte[] byteArray = desFile.Cipher(fileContent, currentKeyLabel.Text);
+            byte[] byteArray = desFile.Cipher(fileContent, key);
 
             SaveFileDialog saveFileDialog = new SaveFileDialog();
 
@@ -96,7 +101,7 @@ namespace Krypto
 
         private void saveButtonDecipher_Click(object sender, EventArgs e)
         {
-            byte[] byteArray = desFile.Decipher(fileContent, currentKeyLabel.Text);
+            byte[] byteArray = desFile.Decipher(fileContent, key);
 
             SaveFileDialog saveFileDialog = new SaveFileDialog();
 

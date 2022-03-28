@@ -196,7 +196,7 @@ namespace Krypto
 
         BitArray Concat(BitArray one, BitArray two)
         {
-            bool[] concat = new bool[one.Length + two.Length];
+            BitArray concat = new BitArray(one.Length + two.Length);
             for (int i = 0; i < one.Length; i++)
             {
                 concat[i] = one[i];
@@ -205,61 +205,69 @@ namespace Krypto
             {
                 concat[i] = two[i - one.Length];
             }
-            return new BitArray(concat);
+            return concat;
         }
 
         BitArray Permutation(BitArray bits, byte[] permut)
         {
-            bool[] toPermut = new bool[permut.Length];
+            BitArray toPermut = new BitArray(permut.Length);
 
             for (int i = 0; i < permut.Length; i++)
             {
                 toPermut[i] = bits[permut[i] - 1];
             }
 
-            return new BitArray(toPermut);
+            return toPermut;
         }
 
         BitArray XOR(BitArray one, BitArray two)
         {
-            return one.Xor(two);
+            BitArray xor = new BitArray(one.Length);
+            for (int i = 0; i < xor.Length; i++) {
+                if (one[i] == two[i]) {
+                    xor[i] = false;
+                } else {
+                    xor[i] = true;
+                }
+            }
+
+            return xor;
         }
 
         BitArray ShiftLeft(BitArray bits, byte number)
         {
-            int inumber = (int)number;
+            int inumber = number;
             List<bool> shift = new List<bool>();
-            BitArray temp = new BitArray(bits.Length);
             for (int i = 0; i < inumber; i++)
             {
                 shift.Add(bits[0]);
-                for(int j = 0; j < bits.Length; j++)
+                for(int j = 0; j < bits.Length - 1; j++)
                 {
-                    temp[i] = bits[i+1];
+                    bits[j] = bits[j+1];
                 }
             }
             int k = 0;
             for(int i = bits.Length-inumber; i < bits.Length; i++)
             {
-                temp[i] = shift[k];
+                bits[i] = shift[k];
                 k++;
             }
-            return temp;
+            return bits;
         }
 
-        BitArray LeftHalf(BitArray bits)
+        public BitArray LeftHalf(BitArray bits)
         {
-            bool[] leftSide = new bool[bits.Length/2];
+            BitArray leftSide = new BitArray(bits.Length/2);
             for(int i = 0; i < leftSide.Length; i++)
             {
                 leftSide[i] = bits[i];
             }
-            return new BitArray(leftSide);
+            return leftSide;
         }
 
-        BitArray RightHalf(BitArray bits)
+        public BitArray RightHalf(BitArray bits)
         {
-            bool[] rightSide = new bool[bits.Length/2];
+            BitArray rightSide = new BitArray(bits.Length/2);
             for(int i = 0; i < rightSide.Length; i++)
             {
                 rightSide[i] = bits[i + rightSide.Length];
@@ -267,12 +275,12 @@ namespace Krypto
             return new BitArray(rightSide);
         }
 
-        BitArray[] GenerateSubKeys(byte[] key)
+        public BitArray[] GenerateSubKeys(byte[] key)
         {
             BitArray[] subkeys = new BitArray[16];
             BitArray keyBits = BytesToBits(key);
 
-            BitArray permutKey = Permutation(new BitArray(key), permutKeyPC1);
+            BitArray permutKey = Permutation(keyBits, permutKeyPC1);
             BitArray temp;
             BitArray rightHalf = RightHalf(permutKey);
             BitArray leftHalf = LeftHalf(permutKey);
@@ -292,7 +300,8 @@ namespace Krypto
         {
             bool[] column = {bits[1], bits[2], bits[3], bits[4]};
             bool[] row = {bits[0], bits[5]};
-            return Convert.ToInt32(BoolArrayToByte(row) * 16 + BoolArrayToByte(column));
+            int number = Convert.ToInt32(BoolArrayToByte(row) * 16 + BoolArrayToByte(column));
+            return number;
         }
 
         BitArray FeistelFunction(BitArray rightHalf, BitArray key)
@@ -304,12 +313,12 @@ namespace Krypto
 
             for (int i = 0; i < xor.Length/6; i++)
             {
-                bool[] bitArray = new bool[6];
+                BitArray bitArray = new BitArray(6);
                 for (int j = i * 6; j < i * 6 + 6; j++)
                 {
                     bitArray[j%6] = xor[j];
                 }
-                groups[i] = new BitArray(bitArray);
+                groups[i] = bitArray;
             }
 
             byte[] temp = new byte[1];
@@ -317,20 +326,19 @@ namespace Krypto
             for (int i = 0; i < groups.Length; i++)
             {
                 temp[0] = SBox[i][getNumber(groups[i])];
-                BitArray helper = new BitArray(temp);
-                bool[] tempResult = new bool[4];
-                int k = 0;
-                for (int j = 7; j >= 4; j--, k++)
+                BitArray helper = BytesToBits(temp);
+                BitArray tempResult = new BitArray(4);
+                for (int j = 4; j < 8; j++)
                 {
-                    tempResult[k] = helper[j];
+                    tempResult[j-4] = helper[j];
                 }
                 if(i == 0)
                 {
-                    result = new BitArray(tempResult);
+                    result = tempResult;
                 } 
                 else
                 {
-                    result = Concat(result, new BitArray(tempResult));
+                    result = Concat(result, tempResult);
                 }
             }
             result = Permutation(result, permutPBlock);
@@ -339,13 +347,13 @@ namespace Krypto
 
         BitArray BlockIterations(BitArray rightHalf, BitArray leftHalf, BitArray[] subKeys)
         {
-            BitArray left = new BitArray(leftHalf);
-            BitArray right = new BitArray(rightHalf);
-            
+            BitArray left = (BitArray)leftHalf.Clone();
+            BitArray right = (BitArray)rightHalf.Clone();
+            BitArray previousLeft = new BitArray(left.Length);
             for (int i = 0; i < 16; i++)
             {
-                BitArray previousLeft = new BitArray(left);
-                left = new BitArray(right);
+                previousLeft = (BitArray)left.Clone();
+                left = (BitArray)right.Clone();
                 right = XOR(previousLeft, FeistelFunction(right, subKeys[i]));
             }
             BitArray result = Concat(right, left);
