@@ -131,8 +131,7 @@ namespace Krypto
         //Type Converters
         public byte[] StringToBytes(string text)
         {
-            var characters = text.ToCharArray();
-            return characters.Select(c => (byte)c).ToArray();
+            return Encoding.UTF8.GetBytes(text);
         }
 
         public BitArray BytesToBits(byte[] array)
@@ -162,8 +161,7 @@ namespace Krypto
 
         public string BytesToString(byte[] array)
         {
-            var characters = array.Select(b => (char)b).ToArray();
-            return new string(characters);
+            return Encoding.UTF8.GetString(array);
         }
 
         public byte[] BitsToBytes(BitArray array)
