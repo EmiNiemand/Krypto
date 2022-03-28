@@ -14,6 +14,9 @@ namespace Krypto
     public partial class Form1 : Form
     {
         DES des = new DES();
+        DES desFile = new DES();
+        byte[] fileContent;
+        byte[] text;
 
         public Form1()
         {
@@ -23,73 +26,32 @@ namespace Krypto
 
         private void messageTextBox_TextChanged(object sender, EventArgs e)
         {
-            if(messageTextBox.Text == "")
-            {
-                encryptButton.Enabled = false;
-                decryptButton.Enabled = false;
-            }
-            if(messageTextBox.Text != "")
-            {
-                encryptButton.Enabled = true;
-                decryptButton.Enabled = true;
-            }
+            encryptButton.Enabled = true;
+            decryptButton.Enabled = true;
         }
 
         private void loadButton_Click(object sender, EventArgs e)
         {
-            String fileContent = String.Empty;
-
             OpenFileDialog openFileDialog = new OpenFileDialog();
-
-            openFileDialog.InitialDirectory = "Documents";
-            openFileDialog.Filter = "txt files (*.txt)|*.txt";
-            openFileDialog.FilterIndex = 2;
-            openFileDialog.RestoreDirectory = true;
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                var fileStream = openFileDialog.OpenFile();
-
-                using (StreamReader reader = new StreamReader(fileStream))
-                {
-                    fileContent = reader.ReadToEnd();
-                }
+                string strfilename = openFileDialog.InitialDirectory + openFileDialog.FileName;
+                fileContent = File.ReadAllBytes(strfilename);
             }
-
-            messageTextBox.Text = fileContent;
         }
 
         private void encryptButton_Click(object sender, EventArgs e)
         {
             resoultGroupBox.Enabled = true;
-            outputTextBox.Text = des.Cipher(messageTextBox.Text, currentKeyLabel.Text);
+            text = des.Cipher(des.StringToBytes(messageTextBox.Text), currentKeyLabel.Text);
+            outputTextBox.Text = des.BytesToString(text);
         }
 
         private void decryptButton_Click(object sender, EventArgs e)
         {
             resoultGroupBox.Enabled = true;
-            outputTextBox.Text = des.Decipher(messageTextBox.Text, currentKeyLabel.Text);
-        }
-
-        private void saveButton_Click(object sender, EventArgs e)
-        {
-            byte[] byteArray = Encoding.UTF8.GetBytes(outputTextBox.Text);
-
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-
-            saveFileDialog.Filter = "*.txt|*.txt";
-            saveFileDialog.FilterIndex = 2;
-            saveFileDialog.RestoreDirectory = true;
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                Stream myStream;
-                if ((myStream = saveFileDialog.OpenFile()) != null)
-                {
-                    myStream.Write(byteArray, 0, byteArray.Length);
-                    myStream.Close();
-                }
-            }
+            messageTextBox.Text = des.BytesToString(des.Decipher(text, currentKeyLabel.Text));
         }
 
         private void newKeyButton_Click(object sender, EventArgs e)
@@ -113,6 +75,40 @@ namespace Krypto
         private void generateRandomKeyButton_Click(object sender, EventArgs e)
         {
             currentKeyLabel.Text = des.GenerateKey();
+        }
+
+        private void saveButtonCipher_Click(object sender, EventArgs e)
+        {
+            byte[] byteArray = desFile.Cipher(fileContent, currentKeyLabel.Text);
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                Stream myStream;
+                if ((myStream = saveFileDialog.OpenFile()) != null)
+                {
+                    myStream.Write(byteArray, 0, byteArray.Length);
+                    myStream.Close();
+                }
+            }
+        }
+
+        private void saveButtonDecipher_Click(object sender, EventArgs e)
+        {
+            byte[] byteArray = desFile.Decipher(fileContent, currentKeyLabel.Text);
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                Stream myStream;
+                if ((myStream = saveFileDialog.OpenFile()) != null)
+                {
+                    myStream.Write(byteArray, 0, byteArray.Length);
+                    myStream.Close();
+                }
+            }
         }
     }
 }

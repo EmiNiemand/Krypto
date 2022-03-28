@@ -35,9 +35,10 @@
             this.currentKeyLabel = new System.Windows.Forms.Label();
             this.newKeyTextBox = new System.Windows.Forms.TextBox();
             this.newKeyButton = new System.Windows.Forms.Button();
-            this.saveButton = new System.Windows.Forms.Button();
+            this.saveButtonCipher = new System.Windows.Forms.Button();
             this.outputTextBox = new System.Windows.Forms.TextBox();
             this.resoultGroupBox = new System.Windows.Forms.GroupBox();
+            this.saveButtonDecipher = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.messageTextBox = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -122,16 +123,16 @@
             this.newKeyButton.UseVisualStyleBackColor = true;
             this.newKeyButton.Click += new System.EventHandler(this.newKeyButton_Click);
             // 
-            // saveButton
+            // saveButtonCipher
             // 
-            this.saveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.saveButton.Location = new System.Drawing.Point(51, 290);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(132, 57);
-            this.saveButton.TabIndex = 17;
-            this.saveButton.Text = "Zapisz do pliku";
-            this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
+            this.saveButtonCipher.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.saveButtonCipher.Location = new System.Drawing.Point(27, 290);
+            this.saveButtonCipher.Name = "saveButtonCipher";
+            this.saveButtonCipher.Size = new System.Drawing.Size(84, 57);
+            this.saveButtonCipher.TabIndex = 17;
+            this.saveButtonCipher.Text = "Zaszyfruj i zapisz";
+            this.saveButtonCipher.UseVisualStyleBackColor = true;
+            this.saveButtonCipher.Click += new System.EventHandler(this.saveButtonCipher_Click);
             // 
             // outputTextBox
             // 
@@ -146,8 +147,9 @@
             // resoultGroupBox
             // 
             this.resoultGroupBox.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.resoultGroupBox.Controls.Add(this.saveButtonDecipher);
             this.resoultGroupBox.Controls.Add(this.outputTextBox);
-            this.resoultGroupBox.Controls.Add(this.saveButton);
+            this.resoultGroupBox.Controls.Add(this.saveButtonCipher);
             this.resoultGroupBox.Enabled = false;
             this.resoultGroupBox.Location = new System.Drawing.Point(418, 47);
             this.resoultGroupBox.Name = "resoultGroupBox";
@@ -155,6 +157,17 @@
             this.resoultGroupBox.TabIndex = 20;
             this.resoultGroupBox.TabStop = false;
             this.resoultGroupBox.Text = "Wynik";
+            // 
+            // saveButtonDecipher
+            // 
+            this.saveButtonDecipher.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.saveButtonDecipher.Location = new System.Drawing.Point(117, 290);
+            this.saveButtonDecipher.Name = "saveButtonDecipher";
+            this.saveButtonDecipher.Size = new System.Drawing.Size(84, 57);
+            this.saveButtonDecipher.TabIndex = 18;
+            this.saveButtonDecipher.Text = "Odszyfruj i zapisz";
+            this.saveButtonDecipher.UseVisualStyleBackColor = true;
+            this.saveButtonDecipher.Click += new System.EventHandler(this.saveButtonDecipher_Click);
             // 
             // loadButton
             // 
@@ -228,12 +241,13 @@
         private System.Windows.Forms.Label currentKeyLabel;
         private System.Windows.Forms.TextBox newKeyTextBox;
         private System.Windows.Forms.Button newKeyButton;
-        private System.Windows.Forms.Button saveButton;
+        private System.Windows.Forms.Button saveButtonCipher;
         private System.Windows.Forms.TextBox outputTextBox;
         private System.Windows.Forms.GroupBox resoultGroupBox;
         private System.Windows.Forms.Button loadButton;
         private System.Windows.Forms.TextBox messageTextBox;
         private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Button saveButtonDecipher;
     }
 }
 

@@ -358,11 +358,11 @@ namespace Krypto
 
 
 
-        public string Cipher(string message, string key)
+        public byte[] Cipher(byte[] message, string key)
         {
             BitArray[] subKeys = GenerateSubKeys(StringToBytes(key));
 
-            BitArray bitMessage = BytesToBits(StringToBytes(message));
+            BitArray bitMessage = BytesToBits(message);
             if(bitMessage.Length % 64 != 0)
             {
                 BitArray newBitMessage = new BitArray(bitMessage.Length + (64 - bitMessage.Length % 64));
@@ -402,17 +402,17 @@ namespace Krypto
                 }
                 hNum++;
             }
-            string CypheredMessage = BytesToString(BitsToBytes(final));
+            byte[] CypheredMessage = BitsToBytes(final);
             return CypheredMessage;
         }
 
-        public string Decipher(string message, string key)
+        public byte[] Decipher(byte[] message, string key)
         {
             BitArray[] subKeys = GenerateSubKeys(StringToBytes(key));
 
             Array.Reverse(subKeys);
 
-            BitArray bitMessage = BytesToBits(StringToBytes(message));
+            BitArray bitMessage = BytesToBits(message);
 
             BitArray[] blocks = new BitArray[bitMessage.Length / 64];
             for(int i = 0; i < bitMessage.Length; i = i + 64)
@@ -450,7 +450,7 @@ namespace Krypto
                 orginalBitMessage[i] = final[i];
             }
 
-            string orginalMessage = BytesToString(BitsToBytes(orginalBitMessage));
+            byte[] orginalMessage = BitsToBytes(orginalBitMessage);
             return orginalMessage;
         }
        
