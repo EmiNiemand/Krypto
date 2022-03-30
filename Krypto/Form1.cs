@@ -27,15 +27,11 @@ namespace Krypto
             generateRandomKeyButton_Click(this, new EventArgs());
         }
 
-        private void messageTextBox_TextChanged(object sender, EventArgs e)
-        {
-            encryptButton.Enabled = true;
-            decryptButton.Enabled = true;
-        }
-
         private void loadButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
+            saveButtonCipher.Enabled = true;
+            saveButtonDecipher.Enabled = true;
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -113,6 +109,19 @@ namespace Krypto
                     myStream.Write(byteArray, 0, byteArray.Length);
                     myStream.Close();
                 }
+            }
+        }
+
+        private void messageTextBox_Change(object sender, EventArgs e)
+        {
+            if(messageTextBox.Text == "")
+            {
+                encryptButton.Enabled = false;
+            }
+            else
+            {
+                encryptButton.Enabled = true;
+                decryptButton.Enabled = true;
             }
         }
     }

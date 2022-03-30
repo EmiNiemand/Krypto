@@ -125,6 +125,7 @@
             // 
             // saveButtonCipher
             // 
+            this.saveButtonCipher.Enabled = false;
             this.saveButtonCipher.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.saveButtonCipher.Location = new System.Drawing.Point(27, 290);
             this.saveButtonCipher.Name = "saveButtonCipher";
@@ -150,7 +151,6 @@
             this.resoultGroupBox.Controls.Add(this.saveButtonDecipher);
             this.resoultGroupBox.Controls.Add(this.outputTextBox);
             this.resoultGroupBox.Controls.Add(this.saveButtonCipher);
-            this.resoultGroupBox.Enabled = false;
             this.resoultGroupBox.Location = new System.Drawing.Point(418, 47);
             this.resoultGroupBox.Name = "resoultGroupBox";
             this.resoultGroupBox.Size = new System.Drawing.Size(236, 361);
@@ -160,6 +160,7 @@
             // 
             // saveButtonDecipher
             // 
+            this.saveButtonDecipher.Enabled = false;
             this.saveButtonDecipher.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.saveButtonDecipher.Location = new System.Drawing.Point(117, 290);
             this.saveButtonDecipher.Name = "saveButtonDecipher";
@@ -188,7 +189,7 @@
             this.messageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.messageTextBox.Size = new System.Drawing.Size(213, 230);
             this.messageTextBox.TabIndex = 2;
-            this.messageTextBox.TextChanged += new System.EventHandler(this.messageTextBox_TextChanged);
+            this.messageTextBox.TextChanged += new System.EventHandler(this.messageTextBox_Change);
             // 
             // groupBox2
             // 
